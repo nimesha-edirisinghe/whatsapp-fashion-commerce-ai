@@ -106,10 +106,13 @@ class TestSessionService:
 
             # Verify ltrim keeps last 10 messages
             mock_redis.ltrim.assert_called_once()
-            call_args = mock_redis.ltrim.call_args
             # Should keep last 10 items (-10, -1)
-            assert call_args[0][1] == -10
-            assert call_args[0][2] == -1
+            # call_args is a tuple (args, kwargs) or a Call object with .args attribute
+            call_args = mock_redis.ltrim.call_args
+            args = call_args.args if hasattr(call_args, 'args') else call_args[0]
+            assert len(args) >= 3, "ltrim should be called with key, start, and end arguments"
+            assert args[1] == -10
+            assert args[2] == -1
 
     @pytest.mark.asyncio
     async def test_add_message_sets_ttl(self, session_service: SessionService):
@@ -128,7 +131,8 @@ class TestSessionService:
             # Verify TTL is 24 hours (86400 seconds)
             mock_redis.expire.assert_called_once()
             call_args = mock_redis.expire.call_args
-            assert call_args[0][1] == 86400
+            args = call_args.args if hasattr(call_args, 'args') else call_args[0]
+            assert args[1] == 86400
 
     @pytest.mark.asyncio
     async def test_clear_context(self, session_service: SessionService):
@@ -150,7 +154,8 @@ class TestSessionService:
 
             # Verify key format includes prefix and phone
             call_args = mock_redis.lrange.call_args
-            key = call_args[0][0]
+            args = call_args.args if hasattr(call_args, 'args') else call_args[0]
+            key = args[0]
             assert "15559876543" in key
             assert "session" in key.lower() or "context" in key.lower()
 
@@ -198,9 +203,11 @@ class TestSessionServiceErrorHandling:
 
             context = await session_service.get_context("15559876543")
 
-            # Should skip invalid entries or return empty on error
-            # Implementation may vary
+            # Should skip invalid entries and return valid ones
             assert isinstance(context, list)
+            assert len(context) == 2  # Should have 2 valid entries
+            assert context[0]["content"] == "Valid"
+            assert context[1]["content"] == "Also valid"
 
 
 class TestSessionServiceContextWindow:
