@@ -9,7 +9,7 @@ from app.config import settings
 from app.core.logging import logger
 
 
-def get_redis_client() -> Redis[bytes]:
+def get_redis_client() -> Redis:
     """Get Redis client instance."""
     return Redis.from_url(
         settings.upstash_redis_url,
