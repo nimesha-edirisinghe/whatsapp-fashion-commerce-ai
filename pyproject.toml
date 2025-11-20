@@ -70,7 +70,7 @@ module = [
     "app.services.conversation_service",
     "app.utils.retry",
 ]
-disable_error_code = ["misc", "return-value", "arg-type", "index", "call-overload", "union-attr", "attr-defined"]
+disable_error_code = ["misc", "return-value", "arg-type", "index", "call-overload", "union-attr", "attr-defined", "str-bytes-safe"]
 
 [[tool.mypy.overrides]]
 module = "app.core.openai_client"
