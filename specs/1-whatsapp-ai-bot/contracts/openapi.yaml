@@ -1,0 +1,339 @@
+openapi: 3.1.0
+info:
+  title: FashionImport AI Bot API
+  description: WhatsApp-based AI sales and support agent for clothing import business
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: http://localhost:8000
+    description: Development
+
+paths:
+  /webhook:
+    get:
+      summary: Verify WhatsApp webhook subscription
+      description: Meta calls this endpoint to verify webhook URL ownership
+      operationId: verifyWebhook
+      tags:
+        - WhatsApp
+      parameters:
+        - name: hub.mode
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [subscribe]
+        - name: hub.verify_token
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Challenge response
+          content:
+            text/plain:
+              schema:
+                type: string
+        '403':
+          description: Invalid verify token
+
+    post:
+      summary: Handle WhatsApp webhook events
+      description: Receives and processes incoming WhatsApp messages
+      operationId: handleWebhook
+      tags:
+        - WhatsApp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WhatsAppWebhookPayload'
+      responses:
+        '200':
+          description: Event processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        '400':
+          description: Invalid payload
+
+  /admin/sync-catalog:
+    post:
+      summary: Sync product catalog
+      description: Endpoint for n8n to sync products from supplier sheets
+      operationId: syncCatalog
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CatalogSyncPayload'
+      responses:
+        '200':
+          description: Catalog synced successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogSyncResponse'
+        '401':
+          description: Invalid API key
+        '422':
+          description: Validation error
+
+  /health:
+    get:
+      summary: Health check
+      description: Check system health and dependencies
+      operationId: healthCheck
+      tags:
+        - System
+      responses:
+        '200':
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: System unhealthy
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    WhatsAppWebhookPayload:
+      type: object
+      required:
+        - object
+        - entry
+      properties:
+        object:
+          type: string
+          example: whatsapp_business_account
+        entry:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              changes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    value:
+                      type: object
+                      properties:
+                        messaging_product:
+                          type: string
+                        metadata:
+                          type: object
+                          properties:
+                            phone_number_id:
+                              type: string
+                        messages:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/WhatsAppMessage'
+
+    WhatsAppMessage:
+      type: object
+      required:
+        - from
+        - type
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+          description: Sender phone number
+        timestamp:
+          type: string
+        type:
+          type: string
+          enum: [text, image, interactive, button]
+        text:
+          type: object
+          properties:
+            body:
+              type: string
+        image:
+          type: object
+          properties:
+            id:
+              type: string
+            mime_type:
+              type: string
+        interactive:
+          type: object
+          properties:
+            type:
+              type: string
+            list_reply:
+              type: object
+              properties:
+                id:
+                  type: string
+                title:
+                  type: string
+            button_reply:
+              type: object
+              properties:
+                id:
+                  type: string
+                title:
+                  type: string
+
+    CatalogSyncPayload:
+      type: object
+      required:
+        - products
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInput'
+        deactivate_missing:
+          type: boolean
+          default: false
+          description: Deactivate products not in this sync
+
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+        - image_urls
+        - sizes
+        - colors
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Existing product ID for update
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+          minimum: 0.01
+        currency:
+          type: string
+          default: USD
+          maxLength: 3
+        supplier_url:
+          type: string
+          format: uri
+        image_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 1
+        sizes:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        colors:
+          type: array
+          items:
+            type: string
+          minItems: 1
+        inventory_count:
+          type: integer
+          default: 0
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    CatalogSyncResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        created:
+          type: integer
+          description: Number of products created
+        updated:
+          type: integer
+          description: Number of products updated
+        deactivated:
+          type: integer
+          description: Number of products deactivated
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              product_name:
+                type: string
+              error:
+                type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [ok, error]
+            redis:
+              type: string
+              enum: [ok, error]
+            openai:
+              type: string
+              enum: [ok, error]
+            gemini:
+              type: string
+              enum: [ok, error]
+
+tags:
+  - name: WhatsApp
+    description: WhatsApp Cloud API webhook endpoints
+  - name: Admin
+    description: Administrative endpoints for catalog management
+  - name: System
+    description: System health and monitoring
