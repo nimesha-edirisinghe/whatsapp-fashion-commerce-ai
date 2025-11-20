@@ -73,15 +73,19 @@ jobs:
 
       - name: Run tests
         env:
-          REDIS_URL: redis://localhost:6379
-          APP_ENV: test
+          UPSTASH_REDIS_URL: redis://localhost:6379
+          APP_ENV: development
+          DEBUG: "true"
           WHATSAPP_ACCESS_TOKEN: test_token
           WHATSAPP_PHONE_NUMBER_ID: test_phone_id
           WHATSAPP_VERIFY_TOKEN: test_verify
+          WHATSAPP_APP_SECRET: ""
           SUPABASE_URL: https://test.supabase.co
-          SUPABASE_KEY: test_key
+          SUPABASE_ANON_KEY: test_anon_key
+          SUPABASE_SERVICE_ROLE_KEY: test_service_key
           OPENAI_API_KEY: test_key
-          GEMINI_API_KEY: test_key
+          GOOGLE_AI_API_KEY: test_key
+          ADMIN_API_KEY: test_admin_key
         run: pytest tests/ -v --cov=app --cov-report=xml
 
       - name: Upload coverage
