@@ -2,13 +2,13 @@
 
 from typing import Any
 
-from app.core.openai_client import openai_client
-from app.core.logging import logger
 from app.core.exceptions import OpenAIError
-from app.utils.retry import async_retry
+from app.core.logging import logger
+from app.core.openai_client import openai_client
+from app.services.escalation_service import escalation_service
 from app.services.rag_service import rag_service
 from app.services.session_service import session_service
-from app.services.escalation_service import escalation_service
+from app.utils.retry import async_retry
 
 
 class AIService:
@@ -79,7 +79,7 @@ Available size formats: XS, S, M, L, XL, XXL and numeric sizes (2-16 US, 34-48 E
             return response.choices[0].message.content or ""
         except Exception as e:
             logger.error(f"AI response generation failed: {e}")
-            raise OpenAIError(f"Failed to generate response: {e}")
+            raise OpenAIError(f"Failed to generate response: {e}") from e
 
     def is_clothing_related(self, message: str) -> bool:
         """
@@ -264,7 +264,7 @@ Available size formats: XS, S, M, L, XL, XXL and numeric sizes (2-16 US, 34-48 E
         message: str,
         reason: str,
         confidence: float | None = None,
-        history: list[dict] | None = None,
+        history: list[dict[str, Any]] | None = None,
     ) -> None:
         """Handle escalation to human agent."""
         await escalation_service.escalate_to_human(

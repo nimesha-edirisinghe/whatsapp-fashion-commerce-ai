@@ -1,8 +1,8 @@
 """Contract tests for WhatsApp Cloud API."""
 
 from typing import Any
+from unittest.mock import AsyncMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 
@@ -56,12 +56,20 @@ class TestWebhookHandler:
         sample_webhook_text_payload: dict[str, Any],
     ) -> None:
         """Test handling text message webhook."""
-        response = test_client.post(
-            "/webhook",
-            json=sample_webhook_text_payload,
-        )
-        assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        with patch("app.api.webhook.ai_service") as mock_ai, \
+             patch("app.api.webhook.whatsapp_service") as mock_whatsapp, \
+             patch("app.api.webhook.conversation_service") as mock_conv:
+
+            mock_ai.process_text_message = AsyncMock(return_value="Test response")
+            mock_whatsapp.send_text = AsyncMock(return_value=True)
+            mock_conv.log_message = AsyncMock()
+
+            response = test_client.post(
+                "/webhook",
+                json=sample_webhook_text_payload,
+            )
+            assert response.status_code == 200
+            assert response.json() == {"status": "ok"}
 
     def test_handle_image_message(
         self,
@@ -69,12 +77,26 @@ class TestWebhookHandler:
         sample_webhook_image_payload: dict[str, Any],
     ) -> None:
         """Test handling image message webhook."""
-        response = test_client.post(
-            "/webhook",
-            json=sample_webhook_image_payload,
-        )
-        assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        with patch("app.api.webhook.whatsapp_service") as mock_whatsapp, \
+             patch("app.api.webhook.vision_service") as mock_vision, \
+             patch("app.api.webhook.product_service") as mock_product, \
+             patch("app.api.webhook.conversation_service") as mock_conv:
+
+            mock_whatsapp.download_media = AsyncMock(return_value=b"fake_image")
+            mock_whatsapp.send_text = AsyncMock(return_value=True)
+            mock_vision.analyze_clothing_image = AsyncMock(return_value={
+                "category": "dress", "color": "blue"
+            })
+            mock_vision.is_valid_clothing_result.return_value = True
+            mock_product.search_by_attributes = AsyncMock(return_value=[])
+            mock_conv.log_visual_search = AsyncMock()
+
+            response = test_client.post(
+                "/webhook",
+                json=sample_webhook_image_payload,
+            )
+            assert response.status_code == 200
+            assert response.json() == {"status": "ok"}
 
     def test_handle_invalid_payload(self, test_client: TestClient) -> None:
         """Test handling invalid webhook payload."""

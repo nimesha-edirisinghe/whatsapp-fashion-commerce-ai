@@ -1,10 +1,9 @@
 """Session service for conversation history management."""
 
 import json
-from typing import Any
 
-from app.core.redis import redis_client
 from app.core.logging import logger
+from app.core.redis import redis_client
 
 
 class SessionService:

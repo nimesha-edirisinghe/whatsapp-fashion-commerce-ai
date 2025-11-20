@@ -1,8 +1,9 @@
 """Async retry decorator with timeout."""
 
 import asyncio
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from app.core.logging import logger
 
@@ -36,7 +37,7 @@ def async_retry(
                         func(*args, **kwargs),
                         timeout=timeout,
                     )
-                except asyncio.TimeoutError as e:
+                except TimeoutError as e:
                     last_exception = e
                     logger.warning(
                         f"{func.__name__} timed out (attempt {attempt + 1}/{attempts + 1})"

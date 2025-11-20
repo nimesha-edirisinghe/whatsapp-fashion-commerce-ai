@@ -5,25 +5,24 @@ import hmac
 import time
 from typing import Any
 
-from fastapi import APIRouter, Query, Request, HTTPException
+from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import PlainTextResponse
 
 from app.config import settings
 from app.core.logging import logger
 from app.models.whatsapp import WhatsAppWebhookPayload
-from app.services.whatsapp_service import whatsapp_service
-from app.services.vision_service import vision_service
-from app.services.product_service import product_service
-from app.services.conversation_service import conversation_service
 from app.services.ai_service import ai_service
+from app.services.conversation_service import conversation_service
 from app.services.order_service import order_service
-from app.utils.message_builder import (
-    build_text_message,
-    format_product_list_for_message,
-    build_fallback_menu,
-    build_catalog_list,
-)
+from app.services.product_service import product_service
+from app.services.vision_service import vision_service
+from app.services.whatsapp_service import whatsapp_service
 from app.utils.language import detect_language
+from app.utils.message_builder import (
+    build_catalog_list,
+    build_fallback_menu,
+    format_product_list_for_message,
+)
 
 router = APIRouter()
 
@@ -435,8 +434,9 @@ async def handle_image_message(customer_phone: str, media_id: str) -> None:
         # Send results to customer
         if products:
             # Convert dict results to Product-like objects for formatting
-            from app.models.product import Product
             from datetime import datetime
+
+            from app.models.product import Product
 
             product_objects = []
             for p in products:

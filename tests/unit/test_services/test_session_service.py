@@ -1,7 +1,8 @@
 """Unit tests for session service."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.session_service import SessionService
 

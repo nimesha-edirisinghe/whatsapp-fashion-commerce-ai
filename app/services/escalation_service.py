@@ -23,8 +23,8 @@ class EscalationService:
         reason: str,
         confidence_score: float | None = None,
         last_message: str | None = None,
-        conversation_history: list[dict] | None = None,
-        metadata: dict | None = None,
+        conversation_history: list[dict[str, Any]] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """
         Escalate conversation to human agent via n8n webhook.

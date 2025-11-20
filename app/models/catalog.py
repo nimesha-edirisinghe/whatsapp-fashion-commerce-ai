@@ -1,6 +1,8 @@
 """Catalog sync models for n8n integration."""
 
 from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -50,6 +52,6 @@ class EscalationPayload(BaseModel):
     reason: str
     confidence_score: float | None = None
     last_message: str | None = None
-    conversation_history: list[dict] = Field(default_factory=list)
-    metadata: dict = Field(default_factory=dict)
+    conversation_history: list[dict[str, Any]] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime

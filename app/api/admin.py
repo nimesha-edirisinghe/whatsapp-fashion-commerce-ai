@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, Header, HTTPException
 
 from app.config import settings
 from app.core.logging import logger
@@ -86,7 +86,7 @@ async def sync_catalog(
 
     except Exception as e:
         logger.error(f"Catalog sync failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}") from e
 
 
 @router.get("/admin/catalog/stats")
@@ -101,4 +101,4 @@ async def get_catalog_stats(
         return stats
     except Exception as e:
         logger.error(f"Failed to get catalog stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

@@ -1,7 +1,8 @@
 """Contract tests for Supabase API."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestSupabaseConnection:

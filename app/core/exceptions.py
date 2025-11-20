@@ -3,7 +3,7 @@
 from typing import Any
 
 
-class BaseAppException(Exception):
+class BaseAppError(Exception):
     """Base exception for all application errors."""
 
     def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
@@ -12,19 +12,19 @@ class BaseAppException(Exception):
         super().__init__(self.message)
 
 
-class ServiceError(BaseAppException):
+class ServiceError(BaseAppError):
     """Error in business logic or service layer."""
 
     pass
 
 
-class ValidationError(BaseAppException):
+class ValidationError(BaseAppError):
     """Error in data validation."""
 
     pass
 
 
-class ExternalAPIError(BaseAppException):
+class ExternalAPIError(BaseAppError):
     """Error communicating with external APIs."""
 
     def __init__(
@@ -75,19 +75,19 @@ class GeminiError(ExternalAPIError):
         super().__init__(message, "gemini", status_code, details)
 
 
-class DatabaseError(BaseAppException):
+class DatabaseError(BaseAppError):
     """Error in database operations."""
 
     pass
 
 
-class SessionError(BaseAppException):
+class SessionError(BaseAppError):
     """Error in session/cache operations."""
 
     pass
 
 
-class EscalationError(BaseAppException):
+class EscalationError(BaseAppError):
     """Error in human escalation process."""
 
     pass

@@ -2,8 +2,8 @@
 
 import os
 from datetime import datetime
-from typing import Any, AsyncGenerator
-from unittest.mock import AsyncMock, MagicMock, patch
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,7 +14,7 @@ os.environ["DEBUG"] = "true"
 os.environ["WHATSAPP_ACCESS_TOKEN"] = "test_token"
 os.environ["WHATSAPP_PHONE_NUMBER_ID"] = "123456789"
 os.environ["WHATSAPP_VERIFY_TOKEN"] = "test_verify_token"
-os.environ["WHATSAPP_APP_SECRET"] = "test_secret"
+os.environ["WHATSAPP_APP_SECRET"] = ""  # Empty to skip signature verification in tests
 os.environ["OPENAI_API_KEY"] = "test_openai_key"
 os.environ["GOOGLE_AI_API_KEY"] = "test_google_key"
 os.environ["SUPABASE_URL"] = "https://test.supabase.co"

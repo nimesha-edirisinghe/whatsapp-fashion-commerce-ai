@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # Admin
     admin_api_key: str
 
+    # n8n Integration (optional)
+    n8n_webhook_url: str = ""
+    n8n_webhook_secret: str = ""
+
     @property
     def is_production(self) -> bool:
         """Check if running in production environment."""
@@ -61,7 +65,7 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
-    return Settings()
+    return Settings()  # type: ignore[call-arg]
 
 
 # Export settings instance for convenience

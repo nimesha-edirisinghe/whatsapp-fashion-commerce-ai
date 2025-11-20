@@ -1,7 +1,7 @@
 """Integration tests for visual search flow."""
 
 from typing import Any
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -16,8 +16,8 @@ class TestVisualSearchFlow:
         sample_product: dict[str, Any],
     ) -> None:
         """Test that uploading image returns matching products."""
-        from app.services.vision_service import VisionService
         from app.services.product_service import ProductService
+        from app.services.vision_service import VisionService
 
         # Mock vision service to return clothing attributes
         mock_attributes = {
@@ -72,6 +72,7 @@ class TestVisualSearchFlow:
     async def test_visual_search_completes_within_timeout(self) -> None:
         """Test that visual search completes within 10 second requirement."""
         import asyncio
+
         from app.services.vision_service import VisionService
 
         mock_attributes = {
@@ -95,7 +96,7 @@ class TestVisualSearchFlow:
                     timeout=10.0,
                 )
                 assert result is not None
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pytest.fail("Visual search exceeded 10 second timeout")
 
     @pytest.mark.asyncio
@@ -140,8 +141,8 @@ class TestImageDownload:
     @pytest.mark.asyncio
     async def test_download_media_failure_handled(self) -> None:
         """Test that media download failures are handled gracefully."""
-        from app.services.whatsapp_service import WhatsAppService
         from app.core.exceptions import WhatsAppAPIError
+        from app.services.whatsapp_service import WhatsAppService
 
         with patch.object(
             WhatsAppService, "download_media", new_callable=AsyncMock

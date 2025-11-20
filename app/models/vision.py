@@ -1,5 +1,7 @@
 """Vision and clothing attribute models."""
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -27,7 +29,7 @@ class ImageAnalysisResult(BaseModel):
     reason: str | None = None
 
     @classmethod
-    def from_dict(cls, data: dict) -> "ImageAnalysisResult":
+    def from_dict(cls, data: dict[str, Any]) -> "ImageAnalysisResult":
         """Create from dictionary response."""
         if data.get("is_clothing") is False:
             return cls(

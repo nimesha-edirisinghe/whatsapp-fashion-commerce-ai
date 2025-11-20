@@ -1,7 +1,8 @@
 """Unit tests for escalation service."""
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.escalation_service import EscalationService
 

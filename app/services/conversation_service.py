@@ -1,11 +1,9 @@
 """Conversation logging service for analytics."""
 
-from datetime import datetime
 from typing import Any
 
 from app.core.database import supabase
 from app.core.logging import logger
-from app.models.conversation import ConversationCreate
 
 
 class ConversationService:

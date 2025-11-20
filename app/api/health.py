@@ -1,20 +1,21 @@
 """Health check endpoint."""
 
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter
 
 from app.core.database import check_database_connection
-from app.core.redis import check_redis_connection
-from app.core.openai_client import check_openai_connection
 from app.core.gemini_client import check_gemini_connection
 from app.core.logging import logger
+from app.core.openai_client import check_openai_connection
+from app.core.redis import check_redis_connection
 
 router = APIRouter()
 
 
 @router.get("/health")
-async def health_check() -> dict:
+async def health_check() -> dict[str, Any]:
     """
     Check system health and dependencies.
 

@@ -1,6 +1,6 @@
 """Unit tests for vision service."""
 
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -75,15 +75,15 @@ class TestVisionService:
     @pytest.mark.asyncio
     async def test_analyze_handles_api_error(self) -> None:
         """Test that API errors are handled gracefully."""
-        from app.services.vision_service import VisionService
         from app.core.exceptions import GeminiError
+        from app.services.vision_service import VisionService
 
         with patch("app.services.vision_service.analyze_image", new_callable=AsyncMock) as mock_analyze:
             mock_analyze.side_effect = Exception("API error")
 
             service = VisionService()
 
-            with pytest.raises(Exception):
+            with pytest.raises(GeminiError):
                 await service.analyze_clothing_image(b"test_image")
 
 

@@ -1,8 +1,8 @@
 """Integration tests for catalog browsing flow."""
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -101,8 +101,13 @@ class TestCatalogBrowseFlow:
     ):
         """Test that 'New Arrivals' trigger returns product list."""
         with patch("app.api.webhook.product_service") as mock_product, \
+             patch("app.api.webhook.order_service") as mock_order, \
              patch("app.api.webhook.whatsapp_service") as mock_whatsapp, \
              patch("app.api.webhook.conversation_service") as mock_conv:
+
+            # Mock detection methods
+            mock_order.extract_order_id.return_value = None  # Not an order ID
+            mock_product.detect_browse_trigger.return_value = "new_arrivals"
 
             mock_product.get_new_arrivals = AsyncMock(return_value=[
                 {"id": "prod-1", "name": "Floral Dress", "price": 59.99},
@@ -280,8 +285,13 @@ class TestCatalogBrowseFlow:
     ):
         """Test that browse interactions are logged."""
         with patch("app.api.webhook.product_service") as mock_product, \
+             patch("app.api.webhook.order_service") as mock_order, \
              patch("app.api.webhook.whatsapp_service") as mock_whatsapp, \
              patch("app.api.webhook.conversation_service") as mock_conv:
+
+            # Mock detection methods
+            mock_order.extract_order_id.return_value = None
+            mock_product.detect_browse_trigger.return_value = "new_arrivals"
 
             mock_product.get_new_arrivals = AsyncMock(return_value=[
                 {"id": "prod-1", "name": "Dress", "price": 59.99},

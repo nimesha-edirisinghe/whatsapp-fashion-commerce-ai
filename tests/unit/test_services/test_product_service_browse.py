@@ -1,7 +1,8 @@
 """Unit tests for product service catalog browsing methods."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.product_service import ProductService
 

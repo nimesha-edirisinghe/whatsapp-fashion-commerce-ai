@@ -3,10 +3,9 @@
 from typing import Any
 
 from app.core.database import supabase
-from app.core.openai_client import create_embedding
-from app.core.logging import logger
 from app.core.exceptions import DatabaseError
-from app.models.product import Product, ProductSearchResult
+from app.core.logging import logger
+from app.core.openai_client import create_embedding
 from app.utils.retry import async_retry
 
 
@@ -44,7 +43,7 @@ class ProductService:
             return result.data or []
         except Exception as e:
             logger.error(f"Vector search failed: {e}")
-            raise DatabaseError(f"Product search failed: {e}")
+            raise DatabaseError(f"Product search failed: {e}") from e
 
     async def search_by_attributes(
         self,
@@ -341,7 +340,7 @@ class ProductService:
 
         except Exception as e:
             logger.error(f"Product upsert failed: {e}")
-            raise DatabaseError(f"Failed to upsert product: {e}")
+            raise DatabaseError(f"Failed to upsert product: {e}") from e
 
     def _build_embedding_text(self, product_data: dict[str, Any]) -> str:
         """Build text for embedding from product data."""

@@ -2,10 +2,10 @@
 
 import time
 from collections import defaultdict
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -86,7 +86,7 @@ def create_app() -> FastAPI:
     app.add_middleware(RateLimitMiddleware, requests_per_minute=100)
 
     # Include routers
-    from app.api import webhook, health, admin
+    from app.api import admin, health, webhook
     app.include_router(webhook.router, tags=["WhatsApp"])
     app.include_router(health.router, tags=["System"])
     app.include_router(admin.router, tags=["Admin"])

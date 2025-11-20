@@ -1,7 +1,8 @@
 """Unit tests for order service."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.order_service import OrderService
 

@@ -3,9 +3,9 @@
 import json
 from typing import Any
 
+from app.core.exceptions import GeminiError
 from app.core.gemini_client import analyze_image
 from app.core.logging import logger
-from app.core.exceptions import GeminiError
 from app.utils.retry import async_retry
 
 
@@ -47,7 +47,7 @@ Return ONLY valid JSON, no other text."""
             return self._parse_response(response)
         except Exception as e:
             logger.error(f"Vision analysis failed: {e}")
-            raise GeminiError(f"Failed to analyze image: {e}")
+            raise GeminiError(f"Failed to analyze image: {e}") from e
 
     def _parse_response(self, response: str) -> dict[str, Any]:
         """Parse and clean JSON response from Gemini."""

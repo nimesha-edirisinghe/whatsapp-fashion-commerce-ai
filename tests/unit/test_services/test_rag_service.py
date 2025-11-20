@@ -1,8 +1,10 @@
 """Unit tests for RAG service."""
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
+
+from app.core.exceptions import DatabaseError
 from app.services.rag_service import RAGService
 
 
@@ -31,7 +33,7 @@ class TestRAGService:
         with patch("app.services.rag_service.create_embedding") as mock_embed:
             mock_embed.side_effect = Exception("API error")
 
-            with pytest.raises(Exception):
+            with pytest.raises(Exception, match="API error"):
                 await rag_service.create_query_embedding("test query")
 
     @pytest.mark.asyncio
@@ -97,7 +99,7 @@ class TestRAGService:
                 ]
             )
 
-            results = await rag_service.search_knowledge_base(
+            await rag_service.search_knowledge_base(
                 "test query",
                 limit=5,
                 threshold=0.8,
@@ -106,7 +108,8 @@ class TestRAGService:
             # Verify RPC was called with threshold
             mock_db.rpc.assert_called_once()
             call_args = mock_db.rpc.call_args
-            assert call_args[1]["match_threshold"] == 0.8
+            # RPC is called with positional args: rpc("match_knowledge_base", {...})
+            assert call_args[0][1]["match_threshold"] == 0.8
 
     @pytest.mark.asyncio
     async def test_search_knowledge_base_respects_limit(self, rag_service: RAGService):
@@ -130,7 +133,8 @@ class TestRAGService:
             assert len(results) <= 3
             # Verify limit was passed to RPC
             call_args = mock_db.rpc.call_args
-            assert call_args[1]["match_count"] == 3
+            # RPC is called with positional args: rpc("match_knowledge_base", {...})
+            assert call_args[0][1]["match_count"] == 3
 
     @pytest.mark.asyncio
     async def test_search_handles_database_error(self, rag_service: RAGService):
@@ -141,7 +145,7 @@ class TestRAGService:
             mock_embed.return_value = [0.1] * 1536
             mock_db.rpc.return_value.execute.side_effect = Exception("DB error")
 
-            with pytest.raises(Exception):
+            with pytest.raises(DatabaseError):
                 await rag_service.search_knowledge_base("test query")
 
     @pytest.mark.asyncio
@@ -166,19 +170,16 @@ class TestRAGService:
 
     @pytest.mark.asyncio
     async def test_search_with_retry_on_timeout(self, rag_service: RAGService):
-        """Test that search retries on timeout."""
+        """Test that search raises on persistent failure."""
         with patch("app.services.rag_service.create_embedding") as mock_embed, \
              patch("app.services.rag_service.supabase") as mock_db:
 
             mock_embed.return_value = [0.1] * 1536
-            # First call times out, second succeeds
-            mock_db.rpc.return_value.execute.side_effect = [
-                Exception("Timeout"),
-                MagicMock(data=[{"id": "kb-1", "content": "Result", "similarity": 0.9}]),
-            ]
+            # Both attempts fail
+            mock_db.rpc.return_value.execute.side_effect = Exception("Timeout")
 
-            # Should raise on first attempt if no retry logic yet
-            with pytest.raises(Exception):
+            # Should raise DatabaseError after all retries exhausted
+            with pytest.raises(DatabaseError):
                 await rag_service.search_knowledge_base("test query")
 
 

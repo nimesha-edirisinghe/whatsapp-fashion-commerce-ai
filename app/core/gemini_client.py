@@ -1,5 +1,7 @@
 """Google Gemini client initialization and utilities."""
 
+from typing import Any
+
 import google.generativeai as genai
 
 from app.config import settings
@@ -29,7 +31,7 @@ async def analyze_image(
         raise
 
 
-async def analyze_clothing_image(image_bytes: bytes) -> dict:
+async def analyze_clothing_image(image_bytes: bytes) -> dict[str, Any]:
     """
     Analyze clothing image to extract attributes.
 

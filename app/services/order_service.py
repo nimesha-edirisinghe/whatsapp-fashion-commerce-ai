@@ -133,9 +133,8 @@ class OrderService:
                 lines.append(f"Est. Delivery: {eta}")
 
         # Add delivery info if delivered
-        if status == "delivered":
-            if delivered_at := order.get("delivered_at"):
-                lines.append(f"Delivered: {delivered_at}")
+        if status == "delivered" and (delivered_at := order.get("delivered_at")):
+            lines.append(f"Delivered: {delivered_at}")
 
         # Add items summary
         items = order.get("items", [])

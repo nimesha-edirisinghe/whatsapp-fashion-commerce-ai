@@ -3,9 +3,9 @@
 from typing import Any
 
 from app.core.database import supabase
-from app.core.openai_client import create_embedding
-from app.core.logging import logger
 from app.core.exceptions import DatabaseError
+from app.core.logging import logger
+from app.core.openai_client import create_embedding
 from app.utils.retry import async_retry
 
 
@@ -60,7 +60,7 @@ class RAGService:
             return result.data or []
         except Exception as e:
             logger.error(f"Knowledge base search failed: {e}")
-            raise DatabaseError(f"Knowledge base search failed: {e}")
+            raise DatabaseError(f"Knowledge base search failed: {e}") from e
 
     def format_context(self, documents: list[dict[str, Any]]) -> str:
         """

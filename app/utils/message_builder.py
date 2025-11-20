@@ -132,7 +132,7 @@ def format_order_status(
 ) -> str:
     """Format order status for display."""
     lines = [
-        f"📦 *Order Status*",
+        "📦 *Order Status*",
         f"Order ID: {order_id}",
         f"Status: {status}",
     ]

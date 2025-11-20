@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 
-from supabase import create_client, Client
+from supabase import Client, create_client
 
 from app.config import settings
 from app.core.logging import logger
@@ -26,7 +26,7 @@ async def check_database_connection() -> bool:
     """Check if database connection is healthy."""
     try:
         # Simple query to verify connection
-        result = supabase.table("products").select("id").limit(1).execute()
+        supabase.table("products").select("id").limit(1).execute()
         return True
     except Exception as e:
         logger.error(f"Database connection check failed: {e}")

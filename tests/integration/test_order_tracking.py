@@ -1,8 +1,8 @@
 """Integration tests for order tracking flow."""
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -58,6 +58,10 @@ class TestOrderTrackingFlow:
         with patch("app.api.webhook.order_service") as mock_order, \
              patch("app.api.webhook.whatsapp_service") as mock_whatsapp, \
              patch("app.api.webhook.conversation_service") as mock_conv:
+
+            # Mock detection method to return the order ID
+            mock_order.extract_order_id.return_value = "ORD-2024-001234"
+            mock_order.format_order_status.return_value = "Order status message"
 
             mock_order.get_order_by_id = AsyncMock(return_value={
                 "id": "ORD-2024-001234",
